@@ -26,14 +26,41 @@ async function dbConnect() {
 }
 dbConnect();
 
+// -------------Collections-----------
+const serviceCollection = client.db('professor-360').collection('services');
+
 
 // ------------End-Points-------------
+app.get('/services', async (req, res) => {
+    try {
+        const cursor = serviceCollection.find({});
+        const services = await cursor.toArray();
+
+        res.send({
+            success: true,
+            message: 'Successfully Get The Data.',
+            data: services
+        })
+    } catch (error) {
+        res.send({
+            success: false,
+            error: error.message
+        })
+    }
+})
 
 app.get('/', (req, res) => {
-    res.send({
-        status: 'true',
-        message: 'Service Review Server is Running.....'
-    })
+    try {
+        res.send({
+            success: true,
+            message: 'Service Review Server is Running.....'
+        })
+    } catch (error) {
+        res.send({
+            success: false,
+            error: error.message
+        })
+    }
 })
 
 
