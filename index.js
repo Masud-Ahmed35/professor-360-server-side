@@ -1,7 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 require("dotenv").config();
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 const app = express();
 const port = process.env.PORT || 7007;
@@ -40,7 +40,45 @@ app.get('/services', async (req, res) => {
             success: true,
             message: 'Successfully Get The Data.',
             data: services
+        });
+
+    } catch (error) {
+        res.send({
+            success: false,
+            error: error.message
         })
+    }
+})
+
+app.get('/home-services', async (req, res) => {
+    try {
+        const cursor = serviceCollection.find({});
+        const services = await cursor.limit(3).toArray();
+
+        res.send({
+            success: true,
+            message: 'Successfully Get The Data.',
+            data: services
+        });
+
+    } catch (error) {
+        res.send({
+            success: false,
+            error: error.message
+        })
+    }
+})
+
+app.get('/service-details/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const service = await serviceCollection.findOne({ _id: ObjectId(id) });
+        res.send({
+            success: true,
+            message: 'Successfully Get the Data.',
+            data: service
+        })
+
     } catch (error) {
         res.send({
             success: false,
@@ -54,7 +92,8 @@ app.get('/', (req, res) => {
         res.send({
             success: true,
             message: 'Service Review Server is Running.....'
-        })
+        });
+
     } catch (error) {
         res.send({
             success: false,
