@@ -28,6 +28,7 @@ dbConnect();
 
 // -------------Collections-----------
 const serviceCollection = client.db('professor-360').collection('services');
+const reviewCollection = client.db('professor-360').collection('reviews');
 
 
 // ------------End-Points-------------
@@ -100,6 +101,25 @@ app.get('/', (req, res) => {
             error: error.message
         })
     }
+})
+
+app.post('/reviews', async (req, res) => {
+    try {
+        const review = req.body;
+        const result = await reviewCollection.insertOne(review);
+        res.send({
+            success: true,
+            message: 'Your Review Submitted Successfully',
+            data: result
+        })
+
+    } catch (error) {
+        res.send({
+            success: false,
+            error: error.message
+        })
+    }
+
 })
 
 
