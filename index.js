@@ -103,6 +103,7 @@ app.get('/', (req, res) => {
     }
 })
 
+// Store Reviews
 app.post('/reviews', async (req, res) => {
     try {
         const review = req.body;
@@ -112,6 +113,28 @@ app.post('/reviews', async (req, res) => {
             message: 'Your Review Submitted Successfully',
             data: result
         })
+
+    } catch (error) {
+        res.send({
+            success: false,
+            error: error.message
+        })
+    }
+
+})
+
+// Get all reviews
+app.get('/reviews/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const cursor = reviewCollection.find({ serviceId: id });
+        const reviews = await cursor.toArray();
+
+        res.send({
+            success: true,
+            message: 'Successfully Get The Data.',
+            data: reviews
+        });
 
     } catch (error) {
         res.send({
