@@ -32,6 +32,8 @@ const reviewCollection = client.db('professor-360').collection('reviews');
 
 
 // ------------End-Points-------------
+
+// Get all service API
 app.get('/services', async (req, res) => {
     try {
         const cursor = serviceCollection.find({});
@@ -51,6 +53,7 @@ app.get('/services', async (req, res) => {
     }
 })
 
+// Get service API using 'limit(3)'
 app.get('/home-services', async (req, res) => {
     try {
         const cursor = serviceCollection.find({});
@@ -70,6 +73,7 @@ app.get('/home-services', async (req, res) => {
     }
 })
 
+// Get service-details API by ID
 app.get('/service-details/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -88,6 +92,7 @@ app.get('/service-details/:id', async (req, res) => {
     }
 })
 
+//  Root API
 app.get('/', (req, res) => {
     try {
         res.send({
@@ -103,7 +108,7 @@ app.get('/', (req, res) => {
     }
 })
 
-// Store Reviews
+// Create Review API
 app.post('/reviews', async (req, res) => {
     try {
         const review = req.body;
@@ -123,7 +128,7 @@ app.post('/reviews', async (req, res) => {
 
 })
 
-// Get all reviews
+// Get all reviews API
 app.get('/reviews/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -143,6 +148,25 @@ app.get('/reviews/:id', async (req, res) => {
         })
     }
 
+})
+
+// Create services API
+app.post('/add-service', async (req, res) => {
+    try {
+        const service = req.body;
+        const result = await serviceCollection.insertOne(service);
+        res.send({
+            success: true,
+            message: 'Your Service Submitted Successfully',
+            data: result
+        })
+
+    } catch (error) {
+        res.send({
+            success: false,
+            error: error.message
+        })
+    }
 })
 
 
