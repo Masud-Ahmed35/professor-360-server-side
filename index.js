@@ -196,6 +196,54 @@ app.post('/add-service', async (req, res) => {
     }
 })
 
+// get a single review API
+app.get('/single-review/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const review = await reviewCollection.findOne({ _id: ObjectId(id) });
+        res.send({
+            success: true,
+            message: 'Get the data',
+            data: review
+        })
+
+    } catch (error) {
+        res.send({
+            success: false,
+            error: error.message
+        })
+    }
+})
+
+// Review Update API
+app.patch('/reviews/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const review = req.body;
+        const query = { _id: ObjectId(id) };
+
+        const updatedReview = {
+            $set: {
+                ratings: review.ratings,
+                message: review.message
+            }
+        }
+
+        const result = await reviewCollection.updateOne(query, updatedReview);
+        res.send({
+            success: true,
+            message: 'Updated Successfully',
+            data: result
+        })
+
+    } catch (error) {
+        res.send({
+            success: false,
+            error: error.message
+        })
+    }
+})
+
 // Delete review API
 app.delete('/reviews/:id', async (req, res) => {
     try {
