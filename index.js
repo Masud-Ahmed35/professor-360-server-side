@@ -108,6 +108,33 @@ app.get('/', (req, res) => {
     }
 })
 
+// Create review API with query (email)
+app.get('/reviews', async (req, res) => {
+    try {
+        let query = {};
+
+        if (req.query.email) {
+            query = {
+                email: req.query.email
+            }
+        }
+
+        const cursor = reviewCollection.find(query);
+        const reviews = await cursor.toArray();
+        res.send({
+            success: true,
+            message: 'Get all the Reviews successfully',
+            data: reviews
+        })
+
+    } catch (error) {
+        res.send({
+            success: false,
+            error: error.message
+        })
+    }
+})
+
 // Create Review API
 app.post('/reviews', async (req, res) => {
     try {
@@ -158,6 +185,25 @@ app.post('/add-service', async (req, res) => {
         res.send({
             success: true,
             message: 'Your Service Submitted Successfully',
+            data: result
+        })
+
+    } catch (error) {
+        res.send({
+            success: false,
+            error: error.message
+        })
+    }
+})
+
+// Delete review API
+app.delete('/reviews/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const result = await reviewCollection.deleteOne({ _id: ObjectId(id) });
+        res.send({
+            success: true,
+            message: 'Deleted Successfully',
             data: result
         })
 
