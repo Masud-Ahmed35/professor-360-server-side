@@ -36,7 +36,7 @@ const reviewCollection = client.db('professor-360').collection('reviews');
 // Get all service API
 app.get('/services', async (req, res) => {
     try {
-        const cursor = serviceCollection.find({});
+        const cursor = serviceCollection.find({}).sort({ "time": -1 });
         const services = await cursor.toArray();
 
         res.send({
@@ -119,7 +119,7 @@ app.get('/reviews', async (req, res) => {
             }
         }
 
-        const cursor = reviewCollection.find(query);
+        const cursor = reviewCollection.find(query).sort({ "time": -1 });
         const reviews = await cursor.toArray();
         res.send({
             success: true,
@@ -159,7 +159,7 @@ app.post('/reviews', async (req, res) => {
 app.get('/reviews/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        const cursor = reviewCollection.find({ serviceId: id });
+        const cursor = reviewCollection.find({ serviceId: id }).sort({ "time": -1 });
         const reviews = await cursor.toArray();
 
         res.send({
@@ -225,7 +225,8 @@ app.patch('/reviews/:id', async (req, res) => {
         const updatedReview = {
             $set: {
                 ratings: review.ratings,
-                message: review.message
+                message: review.message,
+                time: review.time
             }
         }
 
