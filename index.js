@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 require("dotenv").config();
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
@@ -14,6 +15,27 @@ app.use(express.json());
 // -------Database Connection-------
 const uri = `mongodb+srv://${process.env.DB_NAME}:${process.env.DB_PASSWORD}@cluster0.vvll70g.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+
+
+function verifyJWT(req, res, next) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        return res.status(401).send({
+            message: 'Unauthorized Access'
+        })
+    }
+    const token = authHeader.split(' ')[1];
+
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function (err, decoded) {
+        if (err) {
+            return res.status(403).send({
+                message: 'Forbidden Access'
+            })
+        }
+        req.decoded = decoded;
+        next();
+    })
+}
 
 async function dbConnect() {
     try {
@@ -36,13 +58,18 @@ const reviewCollection = client.db('professor-360').collection('reviews');
 // Get all service API
 app.get('/services', async (req, res) => {
     try {
+        const page = parseInt(req.query.page);
+        const size = parseInt(req.query.size);
+
         const cursor = serviceCollection.find({}).sort({ "time": -1 });
-        const services = await cursor.toArray();
+        const services = await cursor.skip(page * size).limit(size).toArray();
+        const count = await serviceCollection.estimatedDocumentCount();
 
         res.send({
             success: true,
             message: 'Successfully Get The Data.',
-            data: services
+            data: services,
+            count: count
         });
 
     } catch (error) {
@@ -109,10 +136,15 @@ app.get('/', (req, res) => {
 })
 
 // Create review API with query (email)
-app.get('/reviews', async (req, res) => {
+app.get('/reviews', verifyJWT, async (req, res) => {
     try {
-        let query = {};
 
+        const decoded = req.decoded;
+        if (decoded.email !== req.query.email) {
+            res.status(403).send({ message: 'Forbidden Access' })
+        }
+
+        let query = {};
         if (req.query.email) {
             query = {
                 email: req.query.email
@@ -264,6 +296,12 @@ app.delete('/reviews/:id', async (req, res) => {
     }
 })
 
+// JWT API Token
+app.post('/jwt', (req, res) => {
+    const user = req.body;
+    const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '10h' })
+    res.send({ token })
+})
 
 app.listen(port, () => {
     console.log(`Server is Running on Port: ${port}`);
